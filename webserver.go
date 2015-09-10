@@ -3,22 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/codegangsta/negroni"
-	"github.com/gorilla/mux"
 	"github.com/jeffbmartinez/cleanexit"
 	"github.com/jeffbmartinez/delay"
 	"github.com/jeffbmartinez/stdoutlog"
 
-	"github.com/jeffbmartinez/todo-webserver/handler"
+	"github.com/jeffbmartinez/todo-webserver/router"
 )
 
 const projectName string = "todo-webserver"
 const defaultListenPort = 8000
-
-const webFileDir = "./web"
 
 func main() {
 	cleanexit.SetUpSimpleExitOnCtrlC()
@@ -29,8 +25,8 @@ func main() {
 	n.Use(delay.Middleware{})
 	n.Use(stdoutlog.Middleware{})
 
-	router := getRouter()
-	n.UseHandler(router)
+	handlerRouter := router.GetRouter()
+	n.UseHandler(handlerRouter)
 
 	listenHost := "localhost"
 	if allowAnyHostToConnect {
@@ -40,20 +36,6 @@ func main() {
 
 	listenAddress := fmt.Sprintf("%v:%v", listenHost, listenPort)
 	n.Run(listenAddress)
-}
-
-func getRouter() *mux.Router {
-	router := mux.NewRouter()
-
-	router.Handle("/{pathname:.*}", http.FileServer(http.Dir(webFileDir)))
-
-	api := router.PathPrefix("/api/").Subrouter()
-
-	api.HandleFunc("/tasks", handler.Tasks)
-	api.HandleFunc("/tasks/new", handler.NewTask)
-	api.HandleFunc("/tasks/{id}", handler.Task)
-
-	return router
 }
 
 func getCommandLineArgs() (allowAnyHostToConnect bool, port int) {
