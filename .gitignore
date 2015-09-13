@@ -22,3 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# todo-webserver
+web/node_modules/
+web/bundle.js
