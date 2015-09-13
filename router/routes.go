@@ -1,8 +1,9 @@
 package router
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
+
+	"github.com/gorilla/mux"
 
 	"github.com/jeffbmartinez/todo-webserver/handler"
 )
@@ -14,9 +15,11 @@ func GetRouter() *mux.Router {
 
 	api := router.PathPrefix("/api/").Subrouter()
 
-	api.HandleFunc("/tasks", handler.Tasks)
-	// api.HandleFunc("/tasks/new", handler.NewTask)
-	// api.HandleFunc("/tasks/{id}", handler.Task)
+	api.HandleFunc("/tasks", handler.ApiTasks)
+	// api.HandleFunc("/tasks/new", handler.ApiNewTask)
+	// api.HandleFunc("/tasks/{id}", handler.ApiTask)
+
+	router.HandleFunc("/tasks", handler.Tasks)
 
 	fileServer := http.FileServer(http.Dir(webFileDir))
 	router.Handle("/{pathname:.*}", fileServer)
