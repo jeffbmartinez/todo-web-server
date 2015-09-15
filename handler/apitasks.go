@@ -31,7 +31,7 @@ type Task struct {
 	Subtasks []*Task `json:"subtasks"`
 }
 
-// ApiTasks handles requests to the /tasks endpoint.
+// ApiTasks handles requests to the /tasks/{id} endpoint.
 func ApiTasks(response http.ResponseWriter, request *http.Request) {
 	handler := BasicResponse(http.StatusMethodNotAllowed)
 

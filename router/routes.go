@@ -20,6 +20,7 @@ func GetRouter() *mux.Router {
 	// api.HandleFunc("/tasks/{id}", handler.ApiTask)
 
 	router.HandleFunc("/tasks", handler.Tasks)
+	router.HandleFunc("/tasks/{id}", handler.TaskHandler)
 
 	fileServer := http.FileServer(http.Dir(webFileDir))
 	router.Handle("/{pathname:.*}", fileServer)

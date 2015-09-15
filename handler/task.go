@@ -2,26 +2,31 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/jeffbmartinez/log"
 )
 
-// Tasks handles requests to the /tasks endpoint.
-func Tasks(response http.ResponseWriter, request *http.Request) {
+// Task handles requests to the /tasks/{id} endpoint.
+func TaskHandler(response http.ResponseWriter, request *http.Request) {
 	handler := BasicResponse(http.StatusMethodNotAllowed)
 
 	switch request.Method {
 	case "GET":
-		handler = showTasks
+		handler = showTask
 	}
 
 	handler(response, request)
 }
 
-func showTasks(response http.ResponseWriter, request *http.Request) {
-	endpoint := Services.Storage.Endpoint + "/tasks"
+func showTask(response http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	taskID := vars["id"]
+
+	endpoint := Services.Storage.Endpoint + "/tasks/" + taskID
 
 	storageResponse, err := http.Get(endpoint)
 	if err != nil {
@@ -30,22 +35,24 @@ func showTasks(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	var tasks []Task
+	var task Task
 	defer storageResponse.Body.Close()
 	decoder := json.NewDecoder(storageResponse.Body)
-	err = decoder.Decode(&tasks)
+	err = decoder.Decode(&task)
 	if err != nil {
 		log.Errorf("Couldn't read body as json in response from '%v' (%v)", endpoint, err)
 		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
-	tasksTemplate, err := template.ParseFiles("./templates/tasks.html", "./templates/newtask.html")
+	taskTemplate, err := template.ParseFiles("./templates/task.html", "./templates/newtask.html")
 	if err != nil {
-		log.Errorf("Couldn't read tasks template")
+		log.Errorf("Couldn't read task template")
 		WriteBasicResponse(http.StatusInternalServerError, response)
 		return
 	}
 
-	tasksTemplate.ExecuteTemplate(response, "tasks", tasks)
+	fmt.Println(task)
+
+	taskTemplate.ExecuteTemplate(response, "task", task)
 }
